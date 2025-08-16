@@ -4,4 +4,3 @@ backgroundColor = "#FFFFFF"          # 메인 배경
 secondaryBackgroundColor = "#F1F3F3" # 사이드바/카드 배경
 textColor = "#1C1C1C"                # 글자색
 font = "sans serif"
-
