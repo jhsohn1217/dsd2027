@@ -1,5 +1,7 @@
 [theme]
-primaryColor = "#7EB900"             # 버튼 색
-backgroundColor = "#FFFFFF"          # 전체 배경색
-secondaryBackgroundColor = "#F1F3F3" # 사이드바(왼쪽 배경)
-textColor = "#1C1C1C"                # 글자 색 (검은색)
+primaryColor = "#7EB900"             # 버튼/포커스 (원하면 "#FDB803"로 교체)
+backgroundColor = "#FFFFFF"          # 메인 배경
+secondaryBackgroundColor = "#F1F3F3" # 사이드바/카드 배경
+textColor = "#1C1C1C"                # 글자색
+font = "sans serif"
+
