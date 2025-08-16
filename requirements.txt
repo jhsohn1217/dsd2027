@@ -1,4 +1,4 @@
-pandas
-matplotlib
-koreanize-matplotlib
-streamlit
+streamlit>=1.29
+plotly>=5.18
+pandas>=2.0 
+numpy>=1.24   
