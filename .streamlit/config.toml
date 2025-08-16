@@ -1,5 +1,5 @@
 [theme]
-primaryColor = "#7EB900"             
-backgroundColor = "#FFFFFF"          
-secondaryBackgroundColor = "#F1F3F3" 
-textColor = "#1C1C1C"
+primaryColor = "#7EB900"             # 버튼 색
+backgroundColor = "#FFFFFF"          # 전체 배경색
+secondaryBackgroundColor = "#F1F3F3" # 사이드바(왼쪽 배경)
+textColor = "#1C1C1C"                # 글자 색 (검은색)
