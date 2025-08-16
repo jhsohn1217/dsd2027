@@ -1,6 +1,6 @@
 [theme]
-primaryColor = "#7EB900"             # 버튼/포커스 (노란 포인트를 원하면 "#FDB803")
-backgroundColor = "#FFFFFF"          # 페이지 배경 (하얀색)
-secondaryBackgroundColor = "#F1F3F3" # 사이드바/카드 배경 (회색빛 흰색)
-textColor = "#1C1C1C"                # 본문 글자색(짙은 회색이 가독성 좋아요)
+primaryColor = "#7EB900"             # 버튼/체크박스 등 포커스 색
+backgroundColor = "#FFFFFF"          # 메인 배경
+secondaryBackgroundColor = "#F1F3F3" # 사이드바 배경
+textColor = "#1C1C1C"                # 글자색
 font = "sans serif"
