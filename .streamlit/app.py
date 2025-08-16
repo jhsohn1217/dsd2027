@@ -1,19 +1,13 @@
-import streamlit as st
+import plotly.express as px
 
-# 우리가 고른 색깔들
-colors = ["#FFFFFF", "#7EB900", "#80B70B", "#F1F3F3", "#FDB803"]
-
-st.title("내 멋진 색깔 팔레트 🎨")
-
-# 색깔 상자 보여주기
-cols = st.columns(len(colors))
-for i, c in enumerate(colors):
-    with cols[i]:
-        st.markdown(
-            f"""
-            <div style="background:{c};border-radius:10px;
-                        height:70px;border:1px solid #ccc"></div>
-            <p style="text-align:center">{c}</p>
-            """,
-            unsafe_allow_html=True,
-        )
+BRAND = ["#7EB900", "#80B70B", "#FDB803", "#F1F3F3", "#111827"]  # 필요 수만큼
+fig = px.bar(
+    df, x="category", y="value", color="category",
+    color_discrete_sequence=BRAND
+)
+fig.update_layout(
+    plot_bgcolor="#F1F3F3",
+    paper_bgcolor="#FFFFFF",
+    font_color="#1C1C1C",
+)
+st.plotly_chart(fig, use_container_width=True)
