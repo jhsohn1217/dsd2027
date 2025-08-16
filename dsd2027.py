@@ -4,8 +4,40 @@ import numpy as np
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
+
+# ===== 브랜드 팔레트 =====
+WHITE   = "#FFFFFF"   # 하얀색(배경)
+GREEN1  = "#7EB900"   # 연두색1(주색)
+GREEN2  = "#80B70B"   # 연두색2(보조색)
+GRAYBG  = "#F1F3F3"   # 회색빛 흰색(보조 배경)
+AMBER   = "#FDB803"   # 노란색(강조)
+TEXT    = "#1C1C1C"   # 텍스트(가독성 좋은 짙은 회색)
+
+# Plotly 전역 스타일(배경/폰트/색상 시퀀스)
+pio.templates["brand"] = pio.templates["plotly_white"]
+pio.templates["brand"]["layout"].update(
+    paper_bgcolor=WHITE,
+    plot_bgcolor=GRAYBG,
+    font_color=TEXT,
+    colorway=[GREEN1, GREEN2, AMBER],  # 기본 시리즈 색
+    margin=dict(l=20, r=20, t=10, b=20),
+)
+px.defaults.template = "brand"
 
 st.set_page_config(page_title="월별 매출 대시보드", layout="wide")
+st.markdown(
+    f"""
+    <style>
+    /* 배경/표 스타일 보완 */
+    .stApp {{ background: {WHITE}; color: {TEXT}; }}
+    .stDataFrame tbody tr td {{ color: {TEXT}; }}
+    .stDataFrame thead tr th {{ color: {TEXT}; }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("📊 월별 매출 대시보드 (Streamlit)")
 st.caption("CSV 업로드 후 4가지 시각화가 자동 생성됩니다. 컬럼: 월(YYYY-MM), 매출액, 전년동월, 증감률(%). 미입력 시 증감률은 전년동월로 자동 계산합니다.")
 
@@ -82,7 +114,7 @@ except Exception as e:
     st.error(f"데이터 처리 중 오류가 발생했습니다: {e}")
     st.stop()
 
-# KPI Cards
+# KPI Cards (색상 이모지로 톤 통일)
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     total_sales = int(df["매출액"].sum())
@@ -104,46 +136,50 @@ with st.container():
     st.subheader("1) 월별 매출 추이 (매출액 vs 전년동월)")
     fig_trend = go.Figure()
     fig_trend.add_trace(go.Scatter(
-        x=df["월"], y=df["매출액"], mode="lines+markers", name="매출액"
+        x=df["월"], y=df["매출액"],
+        mode="lines+markers", name="매출액",
+        line=dict(color=GREEN1, width=3), marker=dict(color=GREEN1, size=8)
     ))
     fig_trend.add_trace(go.Scatter(
-        x=df["월"], y=df["전년동월"], mode="lines+markers", name="전년동월", line=dict(dash="dash")
+        x=df["월"], y=df["전년동월"],
+        mode="lines+markers", name="전년동월",
+        line=dict(color=GREEN2, dash="dash", width=2), marker=dict(color=GREEN2, size=7)
     ))
     # 마커(최고/최저)
     fig_trend.add_trace(go.Scatter(
-        x=[df.loc[max_idx, "월"]], y=[df.loc[max_idx, "매출액"]], mode="markers+text",
-        name="최고", text=["최고"], textposition="top center"
+        x=[df.loc[max_idx, "월"]], y=[df.loc[max_idx, "매출액"]],
+        mode="markers+text", name="최고",
+        marker=dict(color=AMBER, size=12, symbol="star"),
+        text=["최고"], textposition="top center"
     ))
     fig_trend.add_trace(go.Scatter(
-        x=[df.loc[min_idx, "월"]], y=[df.loc[min_idx, "매출액"]], mode="markers+text",
-        name="최저", text=["최저"], textposition="bottom center"
+        x=[df.loc[min_idx, "월"]], y=[df.loc[min_idx, "매출액"]],
+        mode="markers+text", name="최저",
+        marker=dict(color=AMBER, size=10, symbol="triangle-down"),
+        text=["최저"], textposition="bottom center"
     ))
-    fig_trend.update_layout(
-        margin=dict(l=20, r=20, t=10, b=20),
-        yaxis_title="매출액 (원)", xaxis_title="월"
-    )
+    fig_trend.update_layout(yaxis_title="매출액 (원)", xaxis_title="월")
     st.plotly_chart(fig_trend, use_container_width=True)
 
 # 2) 전년 대비 증감률 (막대)
 with st.container():
     st.subheader("2) 전년 대비 증감률")
-    colors = ["#34d399" if v >= 0 else "#f87171" for v in df["증감률"]]
-    fig_yoy = go.Figure(go.Bar(x=df["월"], y=df["증감률"], marker_color=colors, name="증감률"))
-    fig_yoy.update_layout(
-        margin=dict(l=20, r=20, t=10, b=20),
-        yaxis_title="증감률 (%)", xaxis_title="월"
-    )
+    # 양수는 연두(GREEN1), 음수는 노랑(AMBER)로 '주의' 톤 표시
+    bar_colors = [GREEN1 if v >= 0 else AMBER for v in df["증감률"]]
+    fig_yoy = go.Figure(go.Bar(
+        x=df["월"], y=df["증감률"], marker_color=bar_colors, name="증감률",
+        marker_line=dict(width=0.5, color=WHITE)
+    ))
+    fig_yoy.update_layout(yaxis_title="증감률 (%)", xaxis_title="월")
     st.plotly_chart(fig_yoy, use_container_width=True)
 
 # 3) 분기별 매출 분포 (Boxplot)
 with st.container():
     st.subheader("3) 분기별 매출 분포 (Boxplot)")
-    # Boxplot + jittered points
-    fig_box = px.box(df, x="분기", y="매출액", points="all")
-    fig_box.update_layout(
-        margin=dict(l=20, r=20, t=10, b=20),
-        yaxis_title="매출액 (원)", xaxis_title="분기"
-    )
+    # 박스/아웃라이어 색 맞춤
+    fig_box = px.box(df, x="분기", y="매출액", points="all", color_discrete_sequence=[GREEN2])
+    fig_box.update_traces(marker=dict(color=AMBER, line=dict(color=WHITE, width=0.5)))
+    fig_box.update_layout(yaxis_title="매출액 (원)", xaxis_title="분기")
     st.plotly_chart(fig_box, use_container_width=True)
 
 # 4) 월별 KPI 달성률 (라인 + 목표선)
@@ -151,16 +187,23 @@ with st.container():
     st.subheader("4) 월별 KPI 달성률 (목표선 100%)")
     rate = (df["매출액"] / (target if target else 1)) * 100.0
     fig_kpi = go.Figure()
-    fig_kpi.add_trace(go.Scatter(x=df["월"], y=rate, mode="lines+markers", name="달성률"))
-    fig_kpi.add_hline(y=100, line_dash="dash", annotation_text="목표 100%", annotation_position="top left")
-    fig_kpi.update_layout(
-        margin=dict(l=20, r=20, t=10, b=20),
-        yaxis_title="달성률 (%)", xaxis_title="월"
+    fig_kpi.add_trace(go.Scatter(
+        x=df["월"], y=rate, mode="lines+markers", name="달성률",
+        line=dict(color=GREEN1, width=3), marker=dict(color=GREEN1, size=8)
+    ))
+    fig_kpi.add_hline(
+        y=100, line_dash="dash", line_color=AMBER,
+        annotation_text="목표 100%", annotation_position="top left",
+        annotation=dict(font=dict(color=TEXT, size=12), bgcolor=WHITE)
     )
+    fig_kpi.update_layout(yaxis_title="달성률 (%)", xaxis_title="월")
     st.plotly_chart(fig_kpi, use_container_width=True)
 
 st.divider()
 st.subheader("데이터 미리보기")
-st.dataframe(df.drop(columns=["_date"]))
+st.dataframe(
+    df.drop(columns=["_date"]),
+    use_container_width=True,
+)
 
 st.caption("Tip: 좌측 사이드바에서 KPI 목표를 바꾸면 달성률 차트가 즉시 반영됩니다. 업로드 파일은 동일 스키마를 유지해주세요.")
